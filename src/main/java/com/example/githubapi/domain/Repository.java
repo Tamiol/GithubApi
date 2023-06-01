@@ -1,6 +1,5 @@
 package com.example.githubapi.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -12,10 +11,11 @@ public class Repository {
     @JsonProperty("name")
     private String repositoryName;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty("owner/login")
     private String ownerLogin;
 
-    @JsonProperty(value = "fork", access = JsonProperty.Access.WRITE_ONLY)
+    //@JsonProperty(value = "fork", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty("fork")
     private boolean fork;
 
     @JsonProperty(value = "branches_url", access = JsonProperty.Access.WRITE_ONLY)
