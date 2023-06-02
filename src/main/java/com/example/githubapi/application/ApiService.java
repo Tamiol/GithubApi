@@ -3,18 +3,14 @@ package com.example.githubapi.application;
 import com.example.githubapi.domain.Branch;
 import com.example.githubapi.domain.Repository;
 import com.example.githubapi.exception.UserNotFoundException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class ApiService implements ApiUseCase {
@@ -27,26 +23,27 @@ public class ApiService implements ApiUseCase {
     }
 
     public List<Repository> gerUserDetails(String name) {
-        String response;
+        JsonNode response;
         try{
-            response = restTemplate.getForObject(BaseUrl + name + "/repos", String.class);
+            response = restTemplate.getForObject(BaseUrl + name + "/repos", JsonNode.class);
         } catch (HttpClientErrorException e){
             throw new UserNotFoundException(name);
         }
 
-        Repository[] repositories;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(response);
-            repositories = objectMapper.treeToValue(rootNode, Repository[].class);
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException();
+        List<Repository> repositories = new ArrayList<>();
+        for (JsonNode objNode : response) {
+            Repository rep = Repository.builder()
+                    .repositoryName(objNode.get("name").asText())
+                    .ownerLogin(objNode.get("owner").get("login").asText())
+                    .fork(objNode.get("fork").asBoolean())
+                    .branchesUrl(objNode.get("branches_url").asText())
+                    .build();
+            repositories.add(rep);
         }
 
-        if(repositories.length < 1) {return Collections.emptyList();}
+        if(repositories.isEmpty()) {return repositories;}
 
-        return Stream.of(repositories)
+        return repositories.stream()
                 .filter(e -> !e.isFork())
                 .map(repository -> {
                     repository.setBranches(getBranches(repository.getBranchesUrl()));
@@ -57,7 +54,16 @@ public class ApiService implements ApiUseCase {
 
     private List<Branch> getBranches(String url) {
         String branchUrl = url.replace("{/branch}", "");
-        Branch[] response = restTemplate.getForObject(branchUrl, Branch[].class);
-        return  List.of(response);
+        JsonNode response = restTemplate.getForObject(branchUrl, JsonNode.class);
+
+        List<Branch> branches = new ArrayList<>();
+        for (JsonNode objNode : response) {
+            Branch rep = Branch.builder()
+                    .name(objNode.get("name").asText())
+                    .commitSha(objNode.get("commit").get("sha").asText())
+                    .build();
+            branches.add(rep);
+        }
+        return branches;
     }
 }
