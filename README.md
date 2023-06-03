@@ -37,7 +37,7 @@ Base URL: http://localhost:8080
     - #### Response:
       - JSON object `Repository` with the following properties:
         - `name`: Repository name
-        - `owner`: Owner login
+        - `login`: Owner login
         - `branches`: Array of branch names and their last commit SHA.
    - Sample request :
      - `GET http://localhost:8080/Tamiol`
