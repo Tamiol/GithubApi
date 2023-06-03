@@ -4,9 +4,11 @@ import com.example.githubapi.domain.Branch;
 import com.example.githubapi.domain.Repository;
 import com.example.githubapi.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +28,11 @@ public class ApiService implements ApiUseCase {
         JsonNode response;
         try{
             response = restTemplate.getForObject(BaseUrl + name + "/repos", JsonNode.class);
-        } catch (HttpClientErrorException e){
-            throw new UserNotFoundException(name);
+        } catch (HttpClientErrorException ex){
+            switch (ex.getStatusCode().value()) {
+                case 404 ->  throw new UserNotFoundException(name);
+                default -> throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            }
         }
 
         List<Repository> repositories = new ArrayList<>();

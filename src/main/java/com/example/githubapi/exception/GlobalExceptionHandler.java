@@ -37,15 +37,8 @@ public class GlobalExceptionHandler {
 
         ObjectNode body = mapper.createObjectNode();
         body.put("status", String.valueOf(HttpStatus.NOT_ACCEPTABLE.value()));
-        body.put("Message", "unble to parse XML");
+        body.put("Message", "this media type is not acceptable");
 
-        String json = "";
-        try {
-            json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return json;
+        return body.toString();
     }
 }

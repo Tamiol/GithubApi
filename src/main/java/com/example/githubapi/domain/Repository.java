@@ -1,6 +1,7 @@
 package com.example.githubapi.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
+@JsonPropertyOrder({"name", "login", "branches"})
 public class Repository {
 
     @JsonProperty("name")
